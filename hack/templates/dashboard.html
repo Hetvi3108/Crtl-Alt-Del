@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | Skill Intelligence</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<div class="dashboard">
+
+    <!-- LEFT COLUMN -->
+    <div>
+
+        <!-- Stats Row -->
+        <div class="stats-row">
+            <div class="card stat-box">
+                <h3>Daily Time</h3>
+                <p>{{ daily_time }} hrs</p>
+            </div>
+
+            <div class="card stat-box">
+                <h3>Missing Skills</h3>
+                <p>{{ missing_skills|length }}</p>
+            </div>
+        </div>
+
+        <!-- Learning Heatmap -->
+        <div class="card">
+            <h3>Learning Heatmap</h3>
+
+            <!-- MONTH LABELS -->
+            <div class="month-labels">
+    {% for m in month_labels %}
+        <span class="month month-col-{{ m.col }}">
+            {{ m.name }}
+        </span>
+    {% endfor %}
+</div>
+
+
+
+            <!-- HEATMAP GRID -->
+            <div class="year-heatmap">
+                {% for level in heatmap %}
+                    <div class="day level-{{ level }}"></div>
+                {% endfor %}
+            </div>
+
+            <!-- LEGEND -->
+            <div class="heatmap-legend">
+                Less
+                <span class="level-0"></span>
+                <span class="level-1"></span>
+                <span class="level-2"></span>
+                <span class="level-3"></span>
+                <span class="level-4"></span>
+                More
+            </div>
+        </div>
+
+        <!-- Recommended Courses -->
+        <div class="card">
+            <h3>Recommended Courses</h3>
+            <div class="course-grid">
+                {% for course in courses %}
+                <div class="course-card">
+                    <span class="tag">{{ course.provider }}</span>
+                    <h4>{{ course.title }}</h4>
+                    <p>Skill: {{ course.skill }}</p>
+                    <a href="{{ course.link }}" target="_blank">View Course</a>
+                </div>
+                {% else %}
+                <p class="center-text">No recommendations 🎉</p>
+                {% endfor %}
+            </div>
+        </div>
+
+    </div>
+
+    <!-- RIGHT COLUMN -->
+    <div>
+
+        <!-- Weekly Visit Streak -->
+        <div class="card">
+            <h3>Visit Streak</h3>
+            <div class="calendar">
+                {% for day in week %}
+                    <div class="day {% if day.active %}active{% endif %}">
+                        {{ day.name }}
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Skill Gaps -->
+        <div class="card">
+            <h3>Skill Gaps</h3>
+            {% if missing_skills %}
+                {% for skill in missing_skills %}
+                    <span class="skill">{{ skill }}</span>
+                {% endfor %}
+            {% else %}
+                <p class="center-text">All skills covered! 🎉</p>
+            {% endif %}
+        </div>
+
+        <!-- Logout -->
+        <a class="logout-btn" href="/logout">Logout</a>
+
+    </div>
+
+</div>
+
+</body>
+</html>
