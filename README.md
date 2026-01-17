@@ -42,7 +42,7 @@ The project emphasizes:
 
 * HTML5
 * CSS3 (Custom, no frameworks)
-* Jinja2 Templates
+  
 
 ### Backend
 
@@ -189,7 +189,7 @@ Password: test123
 
 ✔ No sensitive data committed
 ✔ Safe for public GitHub repositories
-✔ Ideal for hackathons, demos, and academic showcases
+
 
 ---
 
@@ -201,9 +201,5 @@ Password: test123
 * OAuth / Google login
 * Cloud deployment (AWS / Render / Railway)
 
----
 
-## 🏆 Built for Hackathons
-
-**Smart Academic Calendar** is designed with **clarity, extensibility, and judge-friendly visualization** at its core—making academic progress simple, visual, and motivating.
 
