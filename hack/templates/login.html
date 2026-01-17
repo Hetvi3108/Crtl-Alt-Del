@@ -9,24 +9,39 @@
 <body>
 
 <div class="container">
-    <h2>Welcome Back</h2>
-    <p class="center-text">Log in to your Smart Academic Calendar account</p>
+    <h2>Welcome Back 👋</h2>
+    <p class="center-text">
+        Log in to continue building your personalized learning roadmap
+    </p>
 
     <form method="POST" action="/login">
+
         <label for="username">Username</label>
-        <input id="username" name="username" type="text" placeholder="Enter your username" required>
+        <input
+            id="username"
+            name="username"
+            type="text"
+            placeholder="Enter your username"
+            required
+        >
 
         <label for="password">Password</label>
-        <input id="password" name="password" type="password" placeholder="Enter your password" required>
+        <input
+            id="password"
+            name="password"
+            type="password"
+            placeholder="Enter your password"
+            required
+        >
 
         <button type="submit">Login</button>
     </form>
 
     <p class="center-text">
-        Don't have an account? <a href="/register">Sign up</a>
+        Don’t have an account?
+        <a href="{{ url_for('register') }}">Create one</a>
     </p>
 </div>
 
 </body>
-
 </html>
