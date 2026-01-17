@@ -1,31 +1,306 @@
-.month-labels {
-    display: grid;
-    grid-auto-flow: column;
-    grid-auto-columns: 14px;
-    margin-left: 30px;
+/* ---------- GLOBAL RESET ---------- */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Netflix Sans", "Segoe UI", Roboto, Arial, sans-serif;
+}
+
+body {
+    background: radial-gradient(circle at top, #1c1c1c, #0b0b0b);
+    color: #ffffff;
+    min-height: 100vh;
+}
+
+/* ---------- LINKS ---------- */
+a {
+    color: #e50914;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+/* ---------- AUTH CONTAINER ---------- */
+.container {
+    width: 100%;
+    max-width: 420px;
+    margin: 80px auto;
+    padding: 36px;
+    background: rgba(0, 0, 0, 0.75);
+    border-radius: 12px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+}
+
+/* ---------- HEADINGS ---------- */
+h2 {
+    margin-bottom: 28px;
+    font-size: 28px;
+    font-weight: 600;
+}
+
+h3 {
+    font-size: 16px;
+    font-weight: 500;
+    margin-bottom: 12px;
+}
+
+/* ---------- FORMS ---------- */
+form {
+    display: flex;
+    flex-direction: column;
+}
+
+label {
+    font-size: 13px;
+    color: #b3b3b3;
     margin-bottom: 6px;
+}
+
+input,
+textarea,
+select {
+    background: #141414;
+    color: #fff;
+    border: 1px solid #333;
+    border-radius: 6px;
+    padding: 12px;
+    margin-bottom: 18px;
+    font-size: 14px;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+    outline: none;
+    border-color: #e50914;
+    box-shadow: 0 0 0 1px #e50914;
+}
+
+textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+/* ---------- BUTTONS ---------- */
+button {
+    background: #e50914;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 14px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+button:hover {
+    box-shadow: 0 8px 24px rgba(229, 9, 20, 0.5);
+}
+
+.logout-btn {
+    display: inline-block;
+    margin-top: 24px;
+    padding: 10px 16px;
+    border-radius: 6px;
+    background: #333;
+    color: #fff;
+}
+
+/* ---------- DASHBOARD LAYOUT ---------- */
+.dashboard {
+    display: grid;
+    grid-template-columns: 2.5fr 1fr;
+    gap: 24px;
+    padding: 40px;
+}
+
+.left-column,
+.right-column {
+    display: flex;
+    flex-direction: column;
+}
+
+/* ---------- CARDS ---------- */
+.card {
+    background: linear-gradient(180deg, #141414, #0d0d0d);
+    border-radius: 14px;
+    padding: 24px;
+    margin-bottom: 20px;
+    box-shadow:
+        inset 0 0 0 1px rgba(255,255,255,0.04),
+        0 20px 40px rgba(0,0,0,0.8);
+}
+
+/* ---------- STATS ---------- */
+.stats-row {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+}
+
+.stat-box p {
+    font-size: 26px;
+    font-weight: 600;
+}
+
+/* ---------- GOAL ---------- */
+.goal-text {
+    font-size: 18px;
+    font-weight: 600;
+    color: #e50914;
+}
+
+/* ================= HEATMAP ================= */
+.year-heatmap {
+    display: grid;
+    grid-template-rows: repeat(7, 1fr);
+    grid-auto-flow: column;
+    gap: 4px;
+    margin-top: 16px;
+    overflow-x: auto;
+}
+
+.heat {
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+}
+
+/* Intensity */
+.l0 { background: #1f2933; }
+.l1 { background: #0e4429; }
+.l2 { background: #006d32; }
+.l3 { background: #26a641; }
+.l4 { background: #39d353; }
+
+/* Month labels */
+.month-labels {
+    display: flex;
+    gap: 14px;
     font-size: 12px;
     color: #9ca3af;
 }
 
-.year-heatmap {
+/* Legend */
+.heatmap-legend {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: #9ca3af;
+    margin-top: 10px;
+}
+
+/* ---------- ROADMAP ---------- */
+.roadmap {
+    margin-top: 10px;
+}
+
+.roadmap-step {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.roadmap-step .dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-right: 10px;
+}
+
+.roadmap-step.completed .dot {
+    background: #39d353;
+}
+
+.roadmap-step.pending .dot {
+    background: #e50914;
+}
+
+.skill-name {
+    font-size: 14px;
+    text-transform: capitalize;
+}
+
+/* ---------- COURSES / RESOURCES ---------- */
+.course-grid {
     display: grid;
-    grid-auto-flow: column;
-    grid-template-rows: repeat(7, 14px);
-    gap: 4px;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 16px;
+}
+
+.course-card {
+    background: #0f0f0f;
+    border-radius: 12px;
+    padding: 16px;
+}
+
+.course-card h4 {
+    font-size: 14px;
+    margin-bottom: 8px;
+}
+
+/* ---------- TAG ---------- */
+.tag {
+    display: inline-block;
+    background: #e50914;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+/* ---------- CALENDAR ---------- */
+.calendar {
+    display: flex;
+    gap: 10px;
 }
 
 .day {
-    width: 14px;
-    height: 14px;
-    border-radius: 3px;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: #1f1f1f;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
 }
 
-.level-0 { background: #1f2937; }
-.level-1 { background: #0e4429; }
-.level-2 { background: #006d32; }
-.level-3 { background: #26a641; }
-.level-4 { background: #39d353; }
-.month {
-    grid-column: var(--col);
+.day.active {
+    background: #e50914;
+    font-weight: 600;
+}
+
+/* ---------- SKILLS ---------- */
+.skill-list {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.skill {
+    margin: 6px 6px 0 0;
+    padding: 6px 12px;
+    background: #1f1f1f;
+    border-radius: 999px;
+    font-size: 12px;
+}
+
+/* ---------- TEXT ---------- */
+.center-text {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 14px;
+    color: #b3b3b3;
+}
+
+/* ---------- RESPONSIVE ---------- */
+@media (max-width: 900px) {
+    .dashboard {
+        grid-template-columns: 1fr;
+        padding: 20px;
+    }
 }
