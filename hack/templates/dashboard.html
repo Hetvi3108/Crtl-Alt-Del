@@ -11,13 +11,16 @@
 <div class="dashboard">
 
     <!-- LEFT COLUMN -->
-    <div>
+    <div class="left-column">
 
         <!-- Stats Row -->
         <div class="stats-row">
             <div class="card stat-box">
                 <h3>Daily Time</h3>
-                <p>{{ daily_time }} hrs</p>
+                <p>
+                    {{ daily_time }}
+                    {{ 'hour' if daily_time == 1 else 'hours' }}
+                </p>
             </div>
 
             <div class="card stat-box">
@@ -26,53 +29,66 @@
             </div>
         </div>
 
+        <!-- Career Goal -->
+        <div class="card">
+            <h3>Career Goal</h3>
+            <p class="goal-text">{{ goal }}</p>
+        </div>
+
         <!-- Learning Heatmap -->
         <div class="card">
             <h3>Learning Heatmap</h3>
 
-            <!-- MONTH LABELS -->
             <div class="month-labels">
-    {% for m in month_labels %}
-        <span class="month month-col-{{ m.col }}">
-            {{ m.name }}
-        </span>
-    {% endfor %}
-</div>
-
-
-
-            <!-- HEATMAP GRID -->
-            <div class="year-heatmap">
-                {% for level in heatmap %}
-                    <div class="day level-{{ level }}"></div>
+                {% for month in month_labels %}
+                    <span class="month">{{ month.name }}</span>
                 {% endfor %}
             </div>
 
-            <!-- LEGEND -->
+            <div class="year-heatmap">
+                {% for level in heatmap %}
+                    <div class="heat l{{ level }}"></div>
+                {% endfor %}
+            </div>
+
             <div class="heatmap-legend">
-                Less
-                <span class="level-0"></span>
-                <span class="level-1"></span>
-                <span class="level-2"></span>
-                <span class="level-3"></span>
-                <span class="level-4"></span>
-                More
+                <span>Less</span>
+                <span class="l0"></span>
+                <span class="l1"></span>
+                <span class="l2"></span>
+                <span class="l3"></span>
+                <span class="l4"></span>
+                <span>More</span>
             </div>
         </div>
 
-        <!-- Recommended Courses -->
+        <!-- Roadmap Progress -->
         <div class="card">
-            <h3>Recommended Courses</h3>
+            <h3>Roadmap to {{ goal }}</h3>
+
+            <div class="roadmap">
+                {% for step in roadmap_graph %}
+                    <div class="roadmap-step {% if step.completed %}completed{% else %}pending{% endif %}">
+                        <span class="dot"></span>
+                        <span class="skill-name">{{ step.skill }}</span>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Learning Recommendations -->
+        <div class="card">
+            <h3>Recommended Learning Resources</h3>
+
             <div class="course-grid">
-                {% for course in courses %}
-                <div class="course-card">
-                    <span class="tag">{{ course.provider }}</span>
-                    <h4>{{ course.title }}</h4>
-                    <p>Skill: {{ course.skill }}</p>
-                    <a href="{{ course.link }}" target="_blank">View Course</a>
-                </div>
+                {% for rec in recommendations %}
+                    <div class="course-card">
+                        <span class="tag">{{ rec.platform }}</span>
+                        <h4>{{ rec.skill }}</h4>
+                        <a href="{{ rec.link }}" target="_blank">Open Resource</a>
+                    </div>
                 {% else %}
-                <p class="center-text">No recommendations 🎉</p>
+                    <p class="center-text">No recommendations 🎉</p>
                 {% endfor %}
             </div>
         </div>
@@ -80,11 +96,12 @@
     </div>
 
     <!-- RIGHT COLUMN -->
-    <div>
+    <div class="right-column">
 
         <!-- Weekly Visit Streak -->
         <div class="card">
             <h3>Visit Streak</h3>
+
             <div class="calendar">
                 {% for day in week %}
                     <div class="day {% if day.active %}active{% endif %}">
@@ -97,17 +114,17 @@
         <!-- Skill Gaps -->
         <div class="card">
             <h3>Skill Gaps</h3>
+
             {% if missing_skills %}
-                {% for skill in missing_skills %}
-                    <span class="skill">{{ skill }}</span>
-                {% endfor %}
+                <div class="skill-list">
+                    {% for skill in missing_skills %}
+                        <span class="skill">{{ skill }}</span>
+                    {% endfor %}
+                </div>
             {% else %}
-                <p class="center-text">All skills covered! 🎉</p>
+                <p class="center-text">All required skills achieved 🎉</p>
             {% endif %}
         </div>
-
-        <!-- Logout -->
-        <a class="logout-btn" href="/logout">Logout</a>
 
     </div>
 
@@ -115,4 +132,3 @@
 
 </body>
 </html>
-
