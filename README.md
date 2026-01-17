@@ -42,6 +42,7 @@ The project emphasizes:
 
 * HTML5
 * CSS3 (Custom, no frameworks)
+* Jinja2
   
 
 ### Backend
