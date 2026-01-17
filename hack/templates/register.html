@@ -9,24 +9,39 @@
 <body>
 
 <div class="container">
-    <h2>Create Your Account</h2>
-    <p class="center-text">Join Smart Academic Calendar to start tracking your skills and progress</p>
+    <h2>Create Your Account 🚀</h2>
+    <p class="center-text">
+        Sign up to build your personalized academic and career roadmap
+    </p>
 
     <form method="POST" action="/register">
+
         <label for="username">Username</label>
-        <input id="username" name="username" type="text" placeholder="Choose a username" required>
+        <input
+            id="username"
+            name="username"
+            type="text"
+            placeholder="Choose a username"
+            required
+        >
 
         <label for="password">Password</label>
-        <input id="password" name="password" type="password" placeholder="Choose a strong password" required>
+        <input
+            id="password"
+            name="password"
+            type="password"
+            placeholder="Create a strong password"
+            required
+        >
 
-        <button type="submit">Register</button>
+        <button type="submit">Create Account</button>
     </form>
 
     <p class="center-text">
-        Already have an account? <a href="/login">Login here</a>
+        Already have an account?
+        <a href="{{ url_for('login') }}">Log in</a>
     </p>
 </div>
 
 </body>
-
 </html>
