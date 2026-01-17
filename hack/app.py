@@ -4,10 +4,76 @@ from datetime import datetime, timedelta
 from calendar import month_abbr
 
 app = Flask(__name__)
-app.secret_key = "skill_intelligence_secret"
+app.secret_key = "smart_academic_calendar_secret"
 
+# =========================================================
+# CAREER → ROADMAP (ORDERED SKILLS)
+# =========================================================
+CAREER_ROADMAP = {
+    "Software Developer": [
+        {"skill": "programming fundamentals", "priority": 1},
+        {"skill": "python", "priority": 2},
+        {"skill": "data structures", "priority": 3},
+        {"skill": "git", "priority": 4},
+        {"skill": "databases", "priority": 5},
+        {"skill": "apis", "priority": 6},
+        {"skill": "backend framework", "priority": 7}
+    ],
+    "Data Scientist": [
+        {"skill": "python", "priority": 1},
+        {"skill": "statistics", "priority": 2},
+        {"skill": "sql", "priority": 3},
+        {"skill": "machine learning", "priority": 4},
+        {"skill": "data visualization", "priority": 5}
+    ],
+    "AI Engineer": [
+        {"skill": "python", "priority": 1},
+        {"skill": "linear algebra", "priority": 2},
+        {"skill": "machine learning", "priority": 3},
+        {"skill": "deep learning", "priority": 4},
+        {"skill": "model deployment", "priority": 5}
+    ]
+}
 
-# ---------------- DATABASE ----------------
+# =========================================================
+# MULTI-PLATFORM LEARNING RESOURCES
+# =========================================================
+LEARNING_RESOURCES = {
+    "python": {
+        "Coursera": "https://www.coursera.org/specializations/python",
+        "Udemy": "https://www.udemy.com/topic/python/",
+        "YouTube": "https://www.youtube.com/results?search_query=python+full+course+playlist"
+    },
+    "data structures": {
+        "Coursera": "https://www.coursera.org/specializations/data-structures-algorithms",
+        "Udemy": "https://www.udemy.com/topic/data-structures/",
+        "YouTube": "https://www.youtube.com/results?search_query=data+structures+playlist"
+    },
+    "git": {
+        "Coursera": "https://www.coursera.org/learn/introduction-git-github",
+        "Udemy": "https://www.udemy.com/topic/git/",
+        "YouTube": "https://www.youtube.com/results?search_query=git+github+playlist"
+    },
+    "databases": {
+        "Coursera": "https://www.coursera.org/specializations/database-systems",
+        "Udemy": "https://www.udemy.com/topic/sql/",
+        "YouTube": "https://www.youtube.com/results?search_query=database+management+playlist"
+    },
+    "apis": {
+        "Coursera": "https://www.coursera.org/learn/apis",
+        "Udemy": "https://www.udemy.com/topic/rest-api/",
+        "YouTube": "https://www.youtube.com/results?search_query=rest+api+development+playlist"
+    },
+    "backend framework": {
+        "Coursera": "https://www.coursera.org/specializations/django",
+        "Udemy": "https://www.udemy.com/topic/flask/",
+        "YouTube": "https://www.youtube.com/results?search_query=backend+development+playlist"
+    }
+}
+
+# =========================================================
+# DATABASE
+# =========================================================
 def get_db():
     conn = sqlite3.connect("database.db")
     conn.row_factory = sqlite3.Row
@@ -18,7 +84,6 @@ def init_db():
     conn = get_db()
     cur = conn.cursor()
 
-    # USERS
     cur.execute("""
     CREATE TABLE IF NOT EXISTS users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -27,7 +92,6 @@ def init_db():
     )
     """)
 
-    # PROFILE
     cur.execute("""
     CREATE TABLE IF NOT EXISTS profile (
         user_id INTEGER PRIMARY KEY,
@@ -41,31 +105,6 @@ def init_db():
     )
     """)
 
-    # SCHEDULE
-    cur.execute("""
-    CREATE TABLE IF NOT EXISTS schedule (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        user_id INTEGER,
-        skill TEXT,
-        course_title TEXT,
-        course_link TEXT,
-        planned_minutes INTEGER
-    )
-    """)
-
-    # SESSIONS
-    cur.execute("""
-    CREATE TABLE IF NOT EXISTS sessions (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        user_id INTEGER,
-        skill TEXT,
-        start_time TEXT,
-        end_time TEXT,
-        minutes INTEGER
-    )
-    """)
-
-    # ACTIVITY
     cur.execute("""
     CREATE TABLE IF NOT EXISTS activity (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -78,14 +117,14 @@ def init_db():
     conn.commit()
     conn.close()
 
-
-# ---------------- HOME ----------------
+# =========================================================
+# ROUTES
+# =========================================================
 @app.route("/")
 def home():
     return redirect("/login")
 
 
-# ---------------- REGISTER ----------------
 @app.route("/register", methods=["GET", "POST"])
 def register():
     if request.method == "POST":
@@ -105,41 +144,52 @@ def register():
     return render_template("register.html")
 
 
-# ---------------- LOGIN ----------------
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
         conn = get_db()
         cur = conn.cursor()
+
         cur.execute(
             "SELECT id FROM users WHERE username=? AND password=?",
             (request.form["username"], request.form["password"])
         )
         user = cur.fetchone()
-        conn.close()
 
-        if user:
-            session["user_id"] = user["id"]
+        if not user:
+            return "Invalid credentials"
 
-            # Log today's activity
-            today = datetime.now().strftime("%Y-%m-%d")
-            conn = get_db()
-            cur = conn.cursor()
+        session["user_id"] = user["id"]
+
+        cur.execute(
+            "SELECT daily_time FROM profile WHERE user_id=?",
+            (user["id"],)
+        )
+        profile = cur.fetchone()
+
+        daily_time = profile["daily_time"] if profile else 1
+        minutes = daily_time * 30
+
+        today = datetime.now().strftime("%Y-%m-%d")
+
+        cur.execute(
+            "SELECT id FROM activity WHERE user_id=? AND date=?",
+            (user["id"], today)
+        )
+
+        if not cur.fetchone():
             cur.execute(
                 "INSERT INTO activity (user_id, date, minutes) VALUES (?, ?, ?)",
-                (user["id"], today, 30)
+                (user["id"], today, minutes)
             )
             conn.commit()
-            conn.close()
 
-            return redirect("/dashboard")
-
-        return "Invalid credentials"
+        conn.close()
+        return redirect("/dashboard")
 
     return render_template("login.html")
 
 
-# ---------------- PROFILE ----------------
 @app.route("/profile", methods=["GET", "POST"])
 def profile():
     if "user_id" not in session:
@@ -148,6 +198,7 @@ def profile():
     if request.method == "POST":
         conn = get_db()
         cur = conn.cursor()
+
         cur.execute("""
         INSERT OR REPLACE INTO profile
         (user_id, qualification, graduation, skills, interests, career_field, goal, daily_time)
@@ -160,17 +211,15 @@ def profile():
             request.form["interests"],
             request.form["career"],
             request.form["goal"],
-            request.form["time"]
+            int(request.form["time"])
         ))
+
         conn.commit()
         conn.close()
         return redirect("/dashboard")
 
     return render_template("profile.html")
 
-
-# ---------------- DASHBOARD ----------------
-from datetime import datetime, timedelta
 
 @app.route("/dashboard")
 def dashboard():
@@ -181,99 +230,112 @@ def dashboard():
     conn = get_db()
     cur = conn.cursor()
 
-    # ---------------- USER PROFILE ----------------
     cur.execute("""
-        SELECT daily_time
-        FROM profile
-        WHERE user_id = ?
+        SELECT skills, goal, daily_time
+        FROM profile WHERE user_id=?
     """, (user_id,))
     profile = cur.fetchone()
 
     if not profile:
-        conn.close()
         return redirect("/profile")
 
+    user_skills = {
+        s.strip().lower()
+        for s in profile["skills"].split(",")
+        if s.strip()
+    }
+
+    goal = profile["goal"]
     daily_time = profile["daily_time"]
 
-    # ---------------- WEEK STREAK ----------------
-    days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
-    today_day = datetime.now().strftime("%a")
-    week = [{"name": d, "active": d == today_day} for d in days]
+    roadmap = CAREER_ROADMAP.get(goal, [])
 
-    # ---------------- ACTIVITY DATA ----------------
+    missing_skills = [
+        step["skill"]
+        for step in roadmap
+        if step["skill"] not in user_skills
+    ]
+
+    recommendations = []
+    for skill in missing_skills[:3]:
+        for platform, link in LEARNING_RESOURCES.get(skill, {}).items():
+            recommendations.append({
+                "skill": skill,
+                "platform": platform,
+                "link": link
+            })
+
+    roadmap_graph = [
+        {
+            "skill": step["skill"],
+            "completed": step["skill"] in user_skills
+        }
+        for step in roadmap
+    ]
+
+    today_name = datetime.now().strftime("%a")
+    days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+    week = [{"name": d, "active": d == today_name} for d in days]
+
+    today = datetime.today().date()
+    start_date = today - timedelta(days=364)
+
     cur.execute("""
         SELECT date, SUM(minutes) AS total_minutes
         FROM activity
-        WHERE user_id = ?
+        WHERE user_id=?
         GROUP BY date
     """, (user_id,))
     rows = cur.fetchall()
-
-    activity_data = {
-        row["date"]: row["total_minutes"] for row in rows
-    }
-
-    # ---------------- HEATMAP + MONTH LABELS ----------------
-    today = datetime.today().date()
-    start_date = today - timedelta(days=364)
+    activity = {row["date"]: row["total_minutes"] for row in rows}
 
     heatmap = []
     month_labels = []
 
-    # Align first column to Monday
-    start_weekday = start_date.weekday()
-    for _ in range(start_weekday):
-        heatmap.append(0)
-
-    current_day = start_date
-    last_month = None
-    column_index = 0
-
-    while current_day <= today:
-        # Add month label at first week of new month
-        if current_day.day <= 7 and current_day.month != last_month:
-            month_labels.append({
-                "name": current_day.strftime("%b"),
-                "col": column_index
-            })
-            last_month = current_day.month
-
-        minutes = activity_data.get(current_day.isoformat(), 0)
+    for i in range(365):
+        day = start_date + timedelta(days=i)
+        minutes = activity.get(day.isoformat(), 0)
 
         if minutes == 0:
-            heatmap.append(0)
-        elif minutes < 30:
-            heatmap.append(1)
-        elif minutes < 60:
-            heatmap.append(2)
-        elif minutes < 120:
-            heatmap.append(3)
+            level = 0
+        elif minutes <= 30:
+            level = 1
+        elif minutes <= 60:
+            level = 2
+        elif minutes <= 120:
+            level = 3
         else:
-            heatmap.append(4)
+            level = 4
 
-        if current_day.weekday() == 6:  # Sunday → new column
-            column_index += 1
+        heatmap.append(level)
 
-        current_day += timedelta(days=1)
+        if day.day == 1:
+            month_labels.append({
+                "name": month_abbr[day.month],
+                "col": i + 1
+            })
 
     conn.close()
 
     return render_template(
         "dashboard.html",
-        week=week,
+        daily_time=daily_time,
         heatmap=heatmap,
         month_labels=month_labels,
-        daily_time=daily_time
+        week=week,
+        missing_skills=missing_skills,
+        recommendations=recommendations,
+        roadmap_graph=roadmap_graph,
+        goal=goal
     )
 
-# ---------------- LOGOUT ----------------
+
 @app.route("/logout")
 def logout():
     session.clear()
     return redirect("/login")
 
 
-# ---------------- RUN ----------------
 if __name__ == "__main__":
     init_db()
     app.run(debug=True)
