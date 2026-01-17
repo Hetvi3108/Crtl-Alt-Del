@@ -1,4 +1,4 @@
-# Skill Intelligence 🚀
+# Smart Academic Calendar 🚀
 
 *A Personalized Skill Tracking & Progress Visualization Platform*
 
