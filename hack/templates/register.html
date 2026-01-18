@@ -4,44 +4,668 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Register | Smart Academic Calendar</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Animated background particles */
+        .bg-animation {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 0;
+            top: 0;
+            left: 0;
+        }
+
+        .particle {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            animation: float 20s infinite;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0) translateX(0);
+            }
+            25% {
+                transform: translateY(-100px) translateX(50px);
+            }
+            50% {
+                transform: translateY(-50px) translateX(-50px);
+            }
+            75% {
+                transform: translateY(-150px) translateX(30px);
+            }
+        }
+
+        .container {
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 25px 80px rgba(0, 0, 0, 0.25);
+            padding: 35px 30px;
+            max-width: 450px;
+            width: 100%;
+            animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+            z-index: 1;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(40px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 18px;
+        }
+
+        .logo-icon {
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 18px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            margin-bottom: 10px;
+            box-shadow: 0 12px 30px rgba(102, 126, 234, 0.4);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
+        h2 {
+            color: #1a202c;
+            font-size: 28px;
+            margin-bottom: 8px;
+            text-align: center;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+
+        .subtitle {
+            color: #718096;
+            font-size: 14px;
+            text-align: center;
+            margin-bottom: 22px;
+            line-height: 1.5;
+        }
+
+        .benefits {
+            background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+            padding: 16px;
+            border-radius: 14px;
+            margin-bottom: 25px;
+            border: 2px solid #e2e8f0;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        }
+
+        .benefits h3 {
+            color: #2d3748;
+            font-size: 15px;
+            margin-bottom: 12px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .benefit-item {
+            display: flex;
+            align-items: start;
+            gap: 10px;
+            margin-bottom: 10px;
+            color: #4a5568;
+            font-size: 13px;
+            line-height: 1.4;
+            transition: transform 0.2s ease;
+        }
+
+        .benefit-item:hover {
+            transform: translateX(3px);
+        }
+
+        .benefit-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .benefit-icon {
+            font-size: 18px;
+            margin-top: 1px;
+            flex-shrink: 0;
+        }
+
+        form {
+            margin-top: 20px;
+        }
+
+        .input-group {
+            margin-bottom: 18px;
+        }
+
+        label {
+            display: block;
+            color: #4a5568;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 13px;
+            letter-spacing: 0.3px;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 18px;
+            color: #a0aec0;
+            transition: color 0.3s ease;
+            pointer-events: none;
+        }
+
+        input {
+            width: 100%;
+            padding: 13px 15px 13px 44px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 15px;
+            transition: all 0.3s ease;
+            background: #f7fafc;
+            font-family: inherit;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        input:focus ~ .input-icon {
+            color: #667eea;
+        }
+
+        input::placeholder {
+            color: #cbd5e0;
+        }
+
+        .password-strength {
+            margin-top: 8px;
+            height: 4px;
+            background: #e2e8f0;
+            border-radius: 3px;
+            overflow: hidden;
+            display: none;
+        }
+
+        .password-strength.active {
+            display: block;
+        }
+
+        .password-strength-bar {
+            height: 100%;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            border-radius: 3px;
+        }
+
+        .strength-weak {
+            width: 33%;
+            background: linear-gradient(90deg, #fc8181 0%, #f56565 100%);
+        }
+
+        .strength-medium {
+            width: 66%;
+            background: linear-gradient(90deg, #f6ad55 0%, #ed8936 100%);
+        }
+
+        .strength-strong {
+            width: 100%;
+            background: linear-gradient(90deg, #48bb78 0%, #38a169 100%);
+        }
+
+        .strength-text {
+            margin-top: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            display: none;
+        }
+
+        .strength-text.active {
+            display: block;
+        }
+
+        .strength-text.weak {
+            color: #fc8181;
+        }
+
+        .strength-text.medium {
+            color: #f6ad55;
+        }
+
+        .strength-text.strong {
+            color: #48bb78;
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 5px 16px rgba(102, 126, 234, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+
+        button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s ease;
+        }
+
+        button:hover::before {
+            left: 100%;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 7px 20px rgba(102, 126, 234, 0.5);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .divider {
+            text-align: center;
+            margin: 22px 0;
+            position: relative;
+        }
+
+        .divider::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, #e2e8f0, transparent);
+        }
+
+        .divider span {
+            background: white;
+            padding: 0 15px;
+            color: #a0aec0;
+            font-size: 13px;
+            position: relative;
+            z-index: 1;
+            font-weight: 600;
+        }
+
+        .login-link {
+            text-align: center;
+            margin-top: 18px;
+            color: #718096;
+            font-size: 14px;
+            padding-bottom: 5px;
+        }
+
+        .login-link a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 700;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .login-link a::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: #667eea;
+            transition: width 0.3s ease;
+        }
+
+        .login-link a:hover::after {
+            width: 100%;
+        }
+
+        .login-link a:hover {
+            color: #764ba2;
+        }
+
+        .success-message {
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            color: white;
+            padding: 12px 16px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: none;
+            animation: slideDown 0.5s ease;
+            box-shadow: 0 3px 12px rgba(72, 187, 120, 0.3);
+            font-size: 14px;
+        }
+
+        .success-message.show {
+            display: block;
+        }
+
+        .error-message {
+            background: linear-gradient(135deg, #fed7d7 0%, #feb2b2 100%);
+            color: #c53030;
+            padding: 12px 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 13px;
+            border: 2px solid #fc8181;
+            animation: shake 0.5s ease;
+            font-weight: 600;
+            box-shadow: 0 3px 12px rgba(197, 48, 48, 0.2);
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-8px); }
+            75% { transform: translateX(8px); }
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 30px 25px;
+                max-height: 95vh;
+            }
+
+            h2 {
+                font-size: 24px;
+            }
+
+            .subtitle {
+                font-size: 13px;
+            }
+
+            .benefits {
+                padding: 14px;
+            }
+
+            .benefits h3 {
+                font-size: 14px;
+            }
+
+            .benefit-item {
+                font-size: 12px;
+            }
+
+            input {
+                padding: 12px 14px 12px 42px;
+                font-size: 14px;
+            }
+
+            button {
+                padding: 13px;
+                font-size: 14px;
+            }
+        }
+
+        /* Scrollbar styling */
+        .container::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .container::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        .container::-webkit-scrollbar-thumb {
+            background: #667eea;
+            border-radius: 10px;
+        }
+    </style>
 </head>
 <body>
 
+<!-- Animated Background -->
+<div class="bg-animation">
+    <div class="particle" style="width: 80px; height: 80px; left: 10%; top: 20%; animation-delay: 0s;"></div>
+    <div class="particle" style="width: 60px; height: 60px; left: 80%; top: 30%; animation-delay: 2s;"></div>
+    <div class="particle" style="width: 100px; height: 100px; left: 50%; top: 60%; animation-delay: 4s;"></div>
+    <div class="particle" style="width: 70px; height: 70px; left: 20%; top: 70%; animation-delay: 1s;"></div>
+    <div class="particle" style="width: 90px; height: 90px; left: 70%; top: 80%; animation-delay: 3s;"></div>
+</div>
+
 <div class="container">
-    <h2>Create Your Account 🚀</h2>
-    <p class="center-text">
-        Sign up to build your personalized academic and career roadmap
+    <div class="logo">
+        <div class="logo-icon">🚀</div>
+    </div>
+
+    <h2>Join Smart Academic Calendar</h2>
+    <p class="subtitle">
+        Create your free account and start building your personalized learning roadmap today
     </p>
 
-    <form method="POST" action="/register">
+    <div id="successMessage" class="success-message">
+        ✓ Account created successfully! Redirecting to dashboard...
+    </div>
 
-        <label for="username">Username</label>
-        <input
-            id="username"
-            name="username"
-            type="text"
-            placeholder="Choose a username"
-            required
-        >
+    <div class="benefits">
+        <h3>✨ What You'll Get:</h3>
+        <div class="benefit-item">
+            <span class="benefit-icon">🎯</span>
+            <span>AI-powered career roadmaps for Healthcare, Agriculture & Urban sectors</span>
+        </div>
+        <div class="benefit-item">
+            <span class="benefit-icon">📚</span>
+            <span>Free course recommendations from YouTube, GitHub & freeCodeCamp</span>
+        </div>
+        <div class="benefit-item">
+            <span class="benefit-icon">📊</span>
+            <span>Visual progress tracking with GitHub-style activity heatmaps</span>
+        </div>
+        
+    </div>
 
-        <label for="password">Password</label>
-        <input
-            id="password"
-            name="password"
-            type="password"
-            placeholder="Create a strong password"
-            required
-        >
+    {% if error %}
+    <div class="error-message">
+        ⚠️ {{ error }}
+    </div>
+    {% endif %}
 
-        <button type="submit">Create Account</button>
+    <form method="POST" action="/register" id="registerForm">
+        <div class="input-group">
+            <label for="username">Username</label>
+            <div class="input-wrapper">
+                <input
+                    id="username"
+                    name="username"
+                    type="text"
+                    placeholder="Choose a unique username"
+                    required
+                    autofocus
+                    minlength="3"
+                >
+                <span class="input-icon">👤</span>
+            </div>
+        </div>
+
+        <div class="input-group">
+            <label for="password">Password</label>
+            <div class="input-wrapper">
+                <input
+                    id="password"
+                    name="password"
+                    type="password"
+                    placeholder="Create a strong password (min 6 characters)"
+                    required
+                    minlength="6"
+                >
+                <span class="input-icon">🔒</span>
+            </div>
+            
+            <div class="password-strength" id="strengthBar">
+                <div class="password-strength-bar" id="strengthBarFill"></div>
+            </div>
+            <div class="strength-text" id="strengthText"></div>
+        </div>
+
+        <button type="submit">🚀 Create My Account</button>
     </form>
 
-    <p class="center-text">
-        Already have an account?
-        <a href="{{ url_for('login') }}">Log in</a>
-    </p>
+    <div class="divider">
+        <span>Already a member?</span>
+    </div>
+
+    <div class="login-link">
+        Have an account? 
+        <a href="{{ url_for('login') }}">Log in here →</a>
+    </div>
 </div>
+
+<script>
+    // Password strength indicator
+    const passwordInput = document.getElementById('password');
+    const strengthBar = document.getElementById('strengthBar');
+    const strengthBarFill = document.getElementById('strengthBarFill');
+    const strengthText = document.getElementById('strengthText');
+
+    passwordInput.addEventListener('input', function() {
+        const password = this.value;
+        
+        if (password.length === 0) {
+            strengthBar.classList.remove('active');
+            strengthText.classList.remove('active');
+            return;
+        }
+        
+        strengthBar.classList.add('active');
+        strengthText.classList.add('active');
+        
+        // Enhanced strength calculation
+        let strength = 0;
+        let feedback = '';
+        
+        if (password.length >= 6) strength++;
+        if (password.length >= 10) strength++;
+        if (/[a-z]/.test(password) && /[A-Z]/.test(password)) strength++;
+        if (/\d/.test(password)) strength++;
+        if (/[^a-zA-Z0-9]/.test(password)) strength++;
+        
+        strengthBarFill.className = 'password-strength-bar';
+        strengthText.className = 'strength-text active';
+        
+        if (strength <= 2) {
+            strengthBarFill.classList.add('strength-weak');
+            strengthText.classList.add('weak');
+            strengthText.textContent = '⚠️ Weak password - Add more characters or symbols';
+        } else if (strength <= 3) {
+            strengthBarFill.classList.add('strength-medium');
+            strengthText.classList.add('medium');
+            strengthText.textContent = '⚡ Medium password - Getting better!';
+        } else {
+            strengthBarFill.classList.add('strength-strong');
+            strengthText.classList.add('strong');
+            strengthText.textContent = '✓ Strong password - You\'re all set!';
+        }
+    });
+
+    // Form validation with better UX
+    document.getElementById('registerForm').addEventListener('submit', function(e) {
+        const username = document.getElementById('username').value.trim();
+        const password = document.getElementById('password').value;
+        
+        if (username.length < 3) {
+            e.preventDefault();
+            alert('⚠️ Username must be at least 3 characters long');
+            document.getElementById('username').focus();
+            return;
+        }
+        
+        if (password.length < 6) {
+            e.preventDefault();
+            alert('⚠️ Password must be at least 6 characters long');
+            document.getElementById('password').focus();
+            return;
+        }
+    });
+
+    // Smooth focus transitions
+    const inputs = document.querySelectorAll('input');
+    inputs.forEach(input => {
+        input.addEventListener('focus', function() {
+            this.parentElement.style.transform = 'scale(1.01)';
+            this.parentElement.style.transition = 'transform 0.2s ease';
+        });
+        
+        input.addEventListener('blur', function() {
+            this.parentElement.style.transform = 'scale(1)';
+        });
+    });
+</script>
 
 </body>
 </html>
