@@ -4,92 +4,716 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Profile | Smart Academic Calendar</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Animated background particles */
+        .bg-animation {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 0;
+            top: 0;
+            left: 0;
+        }
+
+        .particle {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 50%;
+            animation: float 25s infinite;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0) translateX(0) rotate(0deg);
+            }
+            33% {
+                transform: translateY(-120px) translateX(80px) rotate(120deg);
+            }
+            66% {
+                transform: translateY(-60px) translateX(-80px) rotate(240deg);
+            }
+        }
+
+        .container {
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 25px 80px rgba(0, 0, 0, 0.25);
+            padding: 50px 45px;
+            max-width: 750px;
+            margin: 0 auto;
+            animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+            z-index: 1;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(40px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .profile-icon {
+            width: 90px;
+            height: 90px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 44px;
+            margin-bottom: 18px;
+            box-shadow: 0 12px 30px rgba(102, 126, 234, 0.4);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
+        h2 {
+            color: #1a202c;
+            font-size: 34px;
+            margin-bottom: 14px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+
+        .subtitle {
+            color: #718096;
+            font-size: 16px;
+            line-height: 1.7;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .progress-indicator {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 45px;
+            padding: 0 40px;
+            gap: 20px;
+        }
+
+        .step {
+            text-align: center;
+            flex: 1;
+            max-width: 150px;
+            position: relative;
+        }
+
+        .step-connector {
+            flex: 1;
+            height: 3px;
+            background: #e2e8f0;
+            border-radius: 2px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .step-connector.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            animation: progress 0.8s ease-out;
+        }
+
+        @keyframes progress {
+            from { width: 0; }
+            to { width: 100%; }
+        }
+
+        .step-number {
+            width: 44px;
+            height: 44px;
+            background: #e2e8f0;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: #a0aec0;
+            font-size: 16px;
+            margin-bottom: 10px;
+            transition: all 0.3s ease;
+            border: 3px solid transparent;
+        }
+
+        .step.active .step-number {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            transform: scale(1.1);
+        }
+
+        .step.completed .step-number {
+            background: #48bb78;
+            color: white;
+        }
+
+        .step-label {
+            font-size: 13px;
+            color: #a0aec0;
+            font-weight: 600;
+        }
+
+        .step.active .step-label {
+            color: #667eea;
+            font-weight: 700;
+        }
+
+        .step.completed .step-label {
+            color: #48bb78;
+        }
+
+        form {
+            margin-top: 35px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 22px;
+            margin-bottom: 22px;
+        }
+
+        .form-group {
+            margin-bottom: 22px;
+        }
+
+        label {
+            display: block;
+            color: #4a5568;
+            font-weight: 600;
+            margin-bottom: 10px;
+            font-size: 14px;
+            letter-spacing: 0.3px;
+        }
+
+        label .required {
+            color: #f56565;
+            margin-left: 3px;
+            font-weight: 700;
+        }
+
+        label .optional {
+            color: #a0aec0;
+            font-weight: 400;
+            font-size: 12px;
+            margin-left: 6px;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 15px 18px;
+            border: 2px solid #e2e8f0;
+            border-radius: 14px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: #f7fafc;
+            font-family: inherit;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+            transform: translateY(-1px);
+        }
+
+        select {
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 14 14'%3E%3Cpath fill='%23667eea' d='M7 10L2 5h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 16px center;
+            padding-right: 45px;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 90px;
+            font-family: inherit;
+            line-height: 1.6;
+        }
+
+        input::placeholder, textarea::placeholder {
+            color: #cbd5e0;
+        }
+
+        .skill-helper {
+            font-size: 12px;
+            color: #718096;
+            margin-top: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            line-height: 1.5;
+        }
+
+        .input-with-icon {
+            position: relative;
+        }
+
+        .input-icon {
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 20px;
+            color: #a0aec0;
+            pointer-events: none;
+        }
+
+        .daily-time-slider {
+            margin-top: 12px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            color: #a0aec0;
+            padding: 0 5px;
+        }
+
+        .daily-time-slider span {
+            font-weight: 600;
+        }
+
+        button {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 14px;
+            font-size: 17px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+            margin-top: 35px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s ease;
+        }
+
+        button:hover::before {
+            left: 100%;
+        }
+
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5);
+        }
+
+        button:active {
+            transform: translateY(-1px);
+        }
+
+        .logout-link {
+            text-align: center;
+            margin-top: 25px;
+        }
+
+        .logout-link a {
+            color: #a0aec0;
+            text-decoration: none;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .logout-link a:hover {
+            color: #667eea;
+        }
+
+        .info-box {
+            background: linear-gradient(135deg, #ebf4ff 0%, #e0e7ff 100%);
+            border-left: 4px solid #667eea;
+            padding: 16px 20px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: start;
+            gap: 12px;
+        }
+
+        .info-box-icon {
+            font-size: 24px;
+            flex-shrink: 0;
+        }
+
+        .info-box-text {
+            color: #4c51bf;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .info-box-text strong {
+            display: block;
+            margin-bottom: 4px;
+            font-size: 15px;
+        }
+
+        @media (max-width: 640px) {
+            .container {
+                padding: 40px 28px;
+            }
+
+            h2 {
+                font-size: 28px;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+                gap: 0;
+            }
+
+            .progress-indicator {
+                padding: 0 10px;
+                gap: 8px;
+            }
+
+            .step-number {
+                width: 38px;
+                height: 38px;
+                font-size: 14px;
+            }
+
+            .step-label {
+                font-size: 11px;
+            }
+
+            input, select, textarea {
+                padding: 13px 16px;
+            }
+        }
+    </style>
 </head>
 <body>
 
-<div class="container">
-    <h2>Complete Your Career Profile</h2>
-    <p class="center-text">
-        This information is used to analyze skill gaps and generate a personalized learning roadmap
-    </p>
-
-    <form method="POST" action="/profile">
-
-        <!-- Qualification -->
-        <label for="qualification">Highest Qualification</label>
-        <select id="qualification" name="qualification" required>
-            <option value="" disabled selected>Select your qualification</option>
-            <option>High School</option>
-            <option>Diploma</option>
-            <option>Bachelor's</option>
-            <option>Master's</option>
-            <option>PhD</option>
-        </select>
-
-        <!-- Graduation -->
-        <label for="graduation">Expected Graduation Year</label>
-        <input
-            id="graduation"
-            name="graduation"
-            type="number"
-            min="2023"
-            max="2035"
-            placeholder="2026"
-            required
-        >
-
-        <!-- Skills -->
-        <label for="skills">Current Skills (comma separated)</label>
-        <textarea
-            id="skills"
-            name="skills"
-            placeholder="python, html, css"
-            required
-        ></textarea>
-
-        <!-- Interests -->
-        <label for="interests">Interests (optional)</label>
-        <textarea
-            id="interests"
-            name="interests"
-            placeholder="AI, Web Development"
-        ></textarea>
-
-        <!-- Career Field -->
-        <label for="career">Career Field</label>
-        <select id="career" name="career" required>
-            <option value="" disabled selected>Select field</option>
-            <option>Technology</option>
-            <option>Healthcare</option>
-            <option>Finance</option>
-            <option>Education</option>
-        </select>
-
-        <!-- Long-Term Goal -->
-        <label for="goal">Long-Term Career Goal</label>
-        <select id="goal" name="goal" required>
-            <option value="" disabled selected>Select your goal</option>
-            <option value="Software Developer">Software Developer</option>
-            <option value="Data Scientist">Data Scientist</option>
-            <option value="AI Engineer">AI Engineer</option>
-        </select>
-
-        <!-- Daily Time -->
-        <label for="time">Daily Study Time (hours per day)</label>
-        <input
-            id="time"
-            name="time"
-            type="number"
-            min="1"
-            max="10"
-            placeholder="2"
-            required
-        >
-
-        <button type="submit">Continue to Dashboard</button>
-    </form>
+<!-- Animated Background -->
+<div class="bg-animation">
+    <div class="particle" style="width: 100px; height: 100px; left: 5%; top: 10%; animation-delay: 0s;"></div>
+    <div class="particle" style="width: 70px; height: 70px; left: 85%; top: 20%; animation-delay: 3s;"></div>
+    <div class="particle" style="width: 120px; height: 120px; left: 50%; top: 50%; animation-delay: 6s;"></div>
+    <div class="particle" style="width: 80px; height: 80px; left: 15%; top: 70%; animation-delay: 2s;"></div>
+    <div class="particle" style="width: 90px; height: 90px; left: 75%; top: 80%; animation-delay: 4s;"></div>
 </div>
+
+<div class="container">
+    <div class="header">
+        <div class="profile-icon">👤</div>
+        <h2>Complete Your Career Profile</h2>
+        <p class="subtitle">
+            Help us understand your background and goals to create a personalized AI-powered learning roadmap tailored to your career aspirations
+        </p>
+    </div>
+
+    <div class="progress-indicator">
+        <div class="step active">
+            <div class="step-number">1</div>
+            <div class="step-label">Profile Setup</div>
+        </div>
+        <div class="step-connector"></div>
+        <div class="step">
+            <div class="step-number">2</div>
+            <div class="step-label">Dashboard</div>
+        </div>
+        <div class="step-connector"></div>
+        <div class="step">
+            <div class="step-number">3</div>
+            <div class="step-label">Learn & Grow</div>
+        </div>
+    </div>
+
+    <div class="info-box">
+        <div class="info-box-icon">✨</div>
+        <div class="info-box-text">
+            <strong>Personalized AI Roadmap</strong>
+            Based on your profile, we'll generate a custom learning path with free courses, project ideas, and skill recommendations from YouTube, GitHub, and freeCodeCamp.
+        </div>
+    </div>
+
+    <form method="POST" action="/profile" id="profileForm">
+        
+        <div class="form-row">
+            <div class="form-group">
+                <label for="qualification">Highest Qualification <span class="required">*</span></label>
+                <select id="qualification" name="qualification" required>
+                    <option value="" disabled selected>Select qualification</option>
+                    <option value="High School">🎓 High School</option>
+                    <option value="Diploma">📜 Diploma</option>
+                    <option value="Associate Degree">📚 Associate Degree</option>
+                    <option value="Bachelor's Degree">🎯 Bachelor's Degree</option>
+                    <option value="Master's Degree">🏆 Master's Degree</option>
+                    <option value="PhD">👨‍🎓 PhD/Doctorate</option>
+                    <option value="Professional Certification">✅ Professional Certification</option>
+                    <option value="Self-Taught">💡 Self-Taught</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="graduation_year">Graduation Year <span class="required">*</span></label>
+                <input
+                    id="graduation_year"
+                    name="graduation_year"
+                    type="number"
+                    min="2000"
+                    max="2035"
+                    placeholder="2026"
+                    required
+                    value="{% if profile %}{{ profile['graduation_year'] }}{% endif %}"
+                >
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="sector">Primary Sector of Interest <span class="required">*</span></label>
+            <select id="sector" name="sector" required>
+                <option value="" disabled selected>Choose your sector</option>
+                <option value="Healthcare">🏥 Healthcare & Medical Technology</option>
+                <option value="Agriculture">🌾 Agriculture & AgriTech</option>
+                <option value="Urban Planning">🏙️ Urban Planning & Smart Cities</option>
+                <option value="Technology">💻 Technology & Software Development</option>
+                <option value="Data Science">📊 Data Science & AI/ML</option>
+                <option value="Engineering">⚙️ Engineering & Automation</option>
+                <option value="Business">💼 Business & Management</option>
+                <option value="Education">📚 Education & EdTech</option>
+                <option value="Finance">💰 Finance & FinTech</option>
+                <option value="Marketing">📢 Marketing & Digital Media</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="career_field">Career Field <span class="required">*</span></label>
+            <select id="career_field" name="career_field" required>
+                <option value="" disabled selected>Select your career field</option>
+                <optgroup label="🏥 Healthcare Sector">
+                    <option value="Healthcare Data Analyst">Healthcare Data Analyst</option>
+                    <option value="Medical AI Specialist">Medical AI Specialist</option>
+                    <option value="Clinical Research Coordinator">Clinical Research Coordinator</option>
+                    <option value="Health Informatics Specialist">Health Informatics Specialist</option>
+                </optgroup>
+                <optgroup label="🌾 Agriculture Sector">
+                    <option value="Precision Agriculture Specialist">Precision Agriculture Specialist</option>
+                    <option value="Agricultural Data Scientist">Agricultural Data Scientist</option>
+                    <option value="Smart Farming Engineer">Smart Farming Engineer</option>
+                    <option value="AgriTech Developer">AgriTech Developer</option>
+                </optgroup>
+                <optgroup label="🏙️ Urban Planning Sector">
+                    <option value="Smart City Planner">Smart City Planner</option>
+                    <option value="Urban Data Analyst">Urban Data Analyst</option>
+                    <option value="Infrastructure IoT Engineer">Infrastructure IoT Engineer</option>
+                    <option value="Sustainable Development Specialist">Sustainable Development Specialist</option>
+                </optgroup>
+                <optgroup label="💻 Technology & Software">
+                    <option value="Software Developer">Software Developer</option>
+                    <option value="Full Stack Developer">Full Stack Developer</option>
+                    <option value="DevOps Engineer">DevOps Engineer</option>
+                    <option value="AI Engineer">AI Engineer</option>
+                    <option value="Data Scientist">Data Scientist</option>
+                </optgroup>
+            </select>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="long_term_goal">Long-Term Career Goal <span class="required">*</span></label>
+                <select id="long_term_goal" name="long_term_goal" required>
+                    <option value="" disabled selected>Your ultimate goal</option>
+                    <!-- Healthcare -->
+                    <option value="Healthcare Data Analyst">Healthcare Data Analyst</option>
+                    <option value="Medical AI Specialist">Medical AI Specialist</option>
+                    <option value="Clinical Research Coordinator">Clinical Research Coordinator</option>
+                    <option value="Health Informatics Specialist">Health Informatics Specialist</option>
+                    <!-- Agriculture -->
+                    <option value="Precision Agriculture Specialist">Precision Agriculture Specialist</option>
+                    <option value="Agricultural Data Scientist">Agricultural Data Scientist</option>
+                    <option value="Smart Farming Engineer">Smart Farming Engineer</option>
+                    <option value="AgriTech Developer">AgriTech Developer</option>
+                    <!-- Urban -->
+                    <option value="Smart City Planner">Smart City Planner</option>
+                    <option value="Urban Data Analyst">Urban Data Analyst</option>
+                    <option value="Infrastructure IoT Engineer">Infrastructure IoT Engineer</option>
+                    <option value="Sustainable Development Specialist">Sustainable Development Specialist</option>
+                    <!-- Tech -->
+                    <option value="Software Developer">Software Developer</option>
+                    <option value="Data Scientist">Data Scientist</option>
+                    <option value="AI Engineer">AI Engineer</option>
+                    <option value="Full Stack Developer">Full Stack Developer</option>
+                    <option value="DevOps Engineer">DevOps Engineer</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="short_term_goal">Short-Term Goal (6 months) <span class="optional">(optional)</span></label>
+                <input
+                    id="short_term_goal"
+                    name="short_term_goal"
+                    type="text"
+                    placeholder="e.g., Master Python fundamentals"
+                    value="{% if profile %}{{ profile['short_term_goal'] }}{% endif %}"
+                >
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="current_skills">Current Skills <span class="required">*</span></label>
+            <textarea
+                id="current_skills"
+                name="current_skills"
+                placeholder="python, html, css, javascript, git, sql, data analysis"
+                required
+            >{% if profile %}{{ profile['current_skills'] }}{% endif %}</textarea>
+            <div class="skill-helper">💡 Separate skills with commas. Be specific (e.g., "machine learning" instead of just "AI")</div>
+        </div>
+
+        <div class="form-group">
+            <label for="interests">Areas of Interest <span class="optional">(optional)</span></label>
+            <textarea
+                id="interests"
+                name="interests"
+                placeholder="AI, Web Development, Cloud Computing, IoT, Blockchain"
+            >{% if profile %}{{ profile['interests'] }}{% endif %}</textarea>
+            <div class="skill-helper">🎯 Help us understand what excites you to personalize recommendations</div>
+        </div>
+
+        <div class="form-group">
+            <label for="daily_time">Daily Learning Goal (minutes) <span class="required">*</span></label>
+            <input
+                id="daily_time"
+                name="daily_time"
+                type="number"
+                min="15"
+                max="480"
+                step="15"
+                placeholder="60"
+                required
+                value="{% if profile %}{{ profile['daily_time'] }}{% endif %}"
+            >
+            <div class="skill-helper">⏱️ Set a realistic daily learning target. We'll track your progress with a GitHub-style heatmap!</div>
+            <div class="daily-time-slider">
+                <span>15 min</span>
+                <span>2 hours</span>
+                <span>4 hours</span>
+                <span>8 hours</span>
+            </div>
+        </div>
+
+        <button type="submit">🚀 Generate My Learning Roadmap</button>
+    </form>
+
+    <div class="logout-link">
+        <a href="{{ url_for('logout') }}">← Back to Login</a>
+    </div>
+</div>
+
+<script>
+    // Auto-sync career field and long-term goal
+    document.getElementById('career_field').addEventListener('change', function() {
+        document.getElementById('long_term_goal').value = this.value;
+    });
+
+    // Form validation with visual feedback
+    const form = document.getElementById('profileForm');
+    const inputs = form.querySelectorAll('input[required], select[required], textarea[required]');
+
+    inputs.forEach(input => {
+        input.addEventListener('invalid', function(e) {
+            e.preventDefault();
+            this.style.borderColor = '#f56565';
+            this.style.animation = 'shake 0.5s ease';
+        });
+
+        input.addEventListener('input', function() {
+            if (this.validity.valid) {
+                this.style.borderColor = '#48bb78';
+            } else {
+                this.style.borderColor = '#e2e8f0';
+            }
+        });
+    });
+
+    // Character counter for textareas
+    const textareas = document.querySelectorAll('textarea');
+    textareas.forEach(textarea => {
+        textarea.addEventListener('input', function() {
+            if (this.value.length > 250) {
+                this.style.borderColor = '#f6ad55';
+            } else if (this.value.length > 0) {
+                this.style.borderColor = '#48bb78';
+            } else {
+                this.style.borderColor = '#e2e8f0';
+            }
+        });
+    });
+
+    // Add loading state to button
+    form.addEventListener('submit', function() {
+        const button = this.querySelector('button');
+        button.textContent = '⏳ Generating Your Roadmap...';
+        button.disabled = true;
+        button.style.cursor = 'wait';
+    });
+
+    // Smooth scroll to first error
+    form.addEventListener('submit', function(e) {
+        const firstInvalid = form.querySelector(':invalid');
+        if (firstInvalid) {
+            e.preventDefault();
+            firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            firstInvalid.focus();
+        }
+    });
+</script>
 
 </body>
 </html>
