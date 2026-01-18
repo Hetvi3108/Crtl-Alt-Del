@@ -4,9 +4,887 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard | Smart Academic Calendar</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0d1117;
+            min-height: 100vh;
+            padding: 0;
+            color: #c9d1d9;
+        }
+
+        /* Top Navigation */
+        .top-nav {
+            background: #161b22;
+            padding: 20px 40px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid #30363d;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 24px;
+            font-weight: 700;
+            color: #c9d1d9;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .user-name {
+            color: #8b949e;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 15px;
+        }
+
+        .nav-btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+
+        .btn-profile {
+            background: #21262d;
+            color: #c9d1d9;
+            border: 1px solid #30363d;
+        }
+
+        .btn-profile:hover {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .btn-logout {
+            background: #da3633;
+            color: white;
+            border: 1px solid #da3633;
+        }
+
+        .btn-logout:hover {
+            background: #c5221f;
+        }
+
+        /* Auto-Tracker Indicator */
+        .auto-tracker {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            padding: 15px 25px;
+            border-radius: 30px;
+            box-shadow: 0 4px 20px rgba(67, 233, 123, 0.4);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            z-index: 1000;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .tracker-dot {
+            width: 12px;
+            height: 12px;
+            background: white;
+            border-radius: 50%;
+            animation: blink 1.5s infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        .tracker-text {
+            color: white;
+            font-weight: 700;
+            font-size: 14px;
+        }
+
+        .tracker-time {
+            color: white;
+            font-weight: 600;
+            font-size: 13px;
+            opacity: 0.9;
+        }
+
+        /* Dashboard Layout */
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr 380px;
+            gap: 30px;
+            padding: 30px 40px;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        .left-column {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        .right-column {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        /* Cards */
+        .card {
+            background: #161b22;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+            border: 1px solid #30363d;
+        }
+
+        .card:hover {
+            border-color: #667eea;
+            box-shadow: 0 4px 20px rgba(102, 126, 234, 0.2);
+        }
+
+        .card h3 {
+            color: #c9d1d9;
+            font-size: 18px;
+            margin-bottom: 20px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Stats Row */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+        }
+
+        .stat-box {
+            text-align: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px 20px;
+        }
+
+        .stat-box h3 {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 13px;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+
+        .stat-box p {
+            font-size: 36px;
+            font-weight: 700;
+            color: white;
+        }
+
+        .stat-box p.small-text {
+            font-size: 18px;
+        }
+
+        .stat-box.secondary {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .stat-box.tertiary {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        .stat-box.quaternary {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+        }
+
+        /* Career Goal */
+        .goal-text {
+            font-size: 24px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .sector-badge {
+            display: inline-block;
+            background: #21262d;
+            color: #8b949e;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            margin-top: 10px;
+            border: 1px solid #30363d;
+        }
+
+        .progress-spacing {
+            margin-top: 20px;
+        }
+
+        /* BEAUTIFUL HEATMAP - LeetCode Style */
+        .heatmap-container {
+            overflow-x: auto;
+            padding: 20px 0;
+        }
+
+        .heatmap-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .heatmap-stats {
+            display: flex;
+            gap: 20px;
+            font-size: 13px;
+            color: #8b949e;
+        }
+
+        .heatmap-stats span {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .heatmap-stats .highlight {
+            color: #58a6ff;
+            font-weight: 700;
+        }
+
+        /* Month labels on top */
+        .heatmap-months {
+            display: flex;
+            gap: 0;
+            margin-bottom: 8px;
+            padding-left: 32px;
+        }
+
+        .month-label {
+            font-size: 12px;
+            color: #8b949e;
+            font-weight: 600;
+            min-width: 60px;
+            text-align: left;
+        }
+
+        /* Main heatmap wrapper */
+        .heatmap-wrapper {
+            display: flex;
+            gap: 8px;
+        }
+
+        /* Day labels (Sun, Mon, Tue, etc.) */
+        .day-labels {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            padding-right: 8px;
+        }
+
+        .day-label {
+            font-size: 11px;
+            color: #8b949e;
+            height: 13px;
+            line-height: 13px;
+            font-weight: 500;
+        }
+
+        /* Heatmap grid */
+        .heatmap-grid {
+            display: flex;
+            gap: 3px;
+            flex: 1;
+        }
+
+        .heatmap-week {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        .heatmap-day {
+            width: 13px;
+            height: 13px;
+            border-radius: 2px;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .heatmap-day:hover {
+            outline: 2px solid rgba(255, 255, 255, 0.6);
+            outline-offset: 0;
+            transform: scale(1.3);
+            z-index: 10;
+        }
+
+        /* GitHub Green Color Scheme */
+        .heatmap-day[data-level="0"] { background: #161b22; }
+        .heatmap-day[data-level="1"] { background: #0e4429; }
+        .heatmap-day[data-level="2"] { background: #006d32; }
+        .heatmap-day[data-level="3"] { background: #26a641; }
+        .heatmap-day[data-level="4"] { background: #39d353; }
+        .heatmap-day[data-level="-1"] { background: transparent; }
+
+        .heatmap-legend {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 11px;
+            color: #8b949e;
+            justify-content: flex-end;
+            margin-top: 15px;
+        }
+
+        .legend-label {
+            margin: 0 5px;
+        }
+
+        .legend-square {
+            width: 13px;
+            height: 13px;
+            border-radius: 2px;
+        }
+
+        /* Tooltip */
+        .heatmap-tooltip {
+            position: fixed;
+            background: #1c2128;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            padding: 10px 14px;
+            font-size: 12px;
+            color: #c9d1d9;
+            pointer-events: none;
+            z-index: 1000;
+            display: none;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+            min-width: 150px;
+        }
+
+        .heatmap-tooltip.show {
+            display: block;
+        }
+
+        .tooltip-date {
+            font-weight: 700;
+            margin-bottom: 6px;
+            font-size: 13px;
+        }
+
+        .tooltip-minutes {
+            color: #8b949e;
+            font-size: 12px;
+        }
+
+        .tooltip-goal {
+            margin-top: 6px;
+            padding-top: 6px;
+            border-top: 1px solid #30363d;
+            font-size: 12px;
+        }
+
+        .tooltip-goal.met {
+            color: #39d353;
+        }
+
+        .tooltip-goal.not-met {
+            color: #f85149;
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            margin-bottom: 20px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 12px;
+            background: #21262d;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 8px;
+            border: 1px solid #30363d;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #39d353 0%, #26a641 100%);
+            transition: width 1s ease;
+            border-radius: 10px;
+            width: 0%;
+        }
+
+        .progress-text {
+            font-size: 14px;
+            color: #8b949e;
+            font-weight: 600;
+        }
+
+        /* Roadmap */
+        .roadmap {
+            position: relative;
+            padding-left: 30px;
+        }
+
+        .roadmap::before {
+            content: '';
+            position: absolute;
+            left: 8px;
+            top: 10px;
+            bottom: 10px;
+            width: 2px;
+            background: #30363d;
+        }
+
+        .roadmap-step {
+            position: relative;
+            padding: 12px 0;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .roadmap-step .dot {
+            position: absolute;
+            left: -26px;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #30363d;
+            border: 3px solid #161b22;
+            box-shadow: 0 0 0 2px #30363d;
+            z-index: 2;
+        }
+
+        .roadmap-step.completed .dot {
+            background: #39d353;
+            box-shadow: 0 0 0 2px #39d353;
+        }
+
+        .roadmap-step.pending .dot {
+            background: #161b22;
+            box-shadow: 0 0 0 2px #f85149;
+        }
+
+        .skill-name {
+            font-weight: 600;
+            color: #8b949e;
+            text-transform: capitalize;
+        }
+
+        .roadmap-step.completed .skill-name {
+            color: #c9d1d9;
+        }
+
+        .roadmap-step.pending .skill-name {
+            color: #6e7681;
+        }
+
+        .checkmark {
+            margin-left: auto;
+            color: #39d353;
+            font-size: 18px;
+        }
+
+        /* Recommendations */
+        .recommendation-section {
+            margin-bottom: 30px;
+            padding-bottom: 30px;
+            border-bottom: 1px solid #30363d;
+        }
+
+        .recommendation-section:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .skill-badge {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 14px;
+            text-transform: capitalize;
+        }
+
+        .course-grid {
+            display: grid;
+            gap: 15px;
+        }
+
+        .course-card {
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 12px;
+            padding: 20px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .course-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .course-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+            border-color: #667eea;
+        }
+
+        .course-thumbnail {
+            width: 100%;
+            height: 120px;
+            background: #21262d;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            object-fit: cover;
+        }
+
+        .platform-tag {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .course-card h4 {
+            color: #c9d1d9;
+            font-size: 16px;
+            margin-bottom: 12px;
+            line-height: 1.4;
+        }
+
+        .course-card a {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .course-card a:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .project-grid {
+            display: grid;
+            gap: 12px;
+            margin-top: 15px;
+        }
+
+        .project-card {
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 10px;
+            padding: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .project-card:hover {
+            border-color: #667eea;
+            transform: translateX(5px);
+        }
+
+        .project-name {
+            font-weight: 700;
+            color: #c9d1d9;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+
+        .project-description {
+            color: #8b949e;
+            font-size: 13px;
+            margin-bottom: 10px;
+            line-height: 1.4;
+        }
+
+        .project-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .project-stars {
+            color: #f6ad55;
+            font-weight: 600;
+            font-size: 12px;
+        }
+
+        .project-link {
+            color: #58a6ff;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 12px;
+        }
+
+        .project-link:hover {
+            text-decoration: underline;
+        }
+
+        .section-title {
+            color: #8b949e;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+
+        /* Weekly Streak */
+        .streak-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .streak-count {
+            background: linear-gradient(135deg, #f6ad55 0%, #ed8936 100%);
+            color: white;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 13px;
+        }
+
+        .today-progress {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #30363d;
+        }
+
+        .today-progress h4 {
+            color: #8b949e;
+            font-size: 13px;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .today-bar {
+            width: 100%;
+            height: 8px;
+            background: #21262d;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 8px;
+        }
+
+        .today-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            transition: width 1s ease;
+            border-radius: 10px;
+            width: 0%;
+        }
+
+        .today-text {
+            font-size: 12px;
+            color: #8b949e;
+        }
+
+        /* Skill List */
+        .skill-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .skill {
+            background: #21262d;
+            color: #f85149;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 13px;
+            text-transform: capitalize;
+            border: 1px solid #30363d;
+        }
+
+        .achievements-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .achievement-item {
+            background: #0d1117;
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #30363d;
+            border-left: 4px solid #39d353;
+        }
+
+        .achievement-title {
+            font-weight: 700;
+            color: #c9d1d9;
+            margin-bottom: 5px;
+        }
+
+        .achievement-desc {
+            font-size: 13px;
+            color: #8b949e;
+            margin-bottom: 5px;
+        }
+
+        .achievement-date {
+            font-size: 12px;
+            color: #6e7681;
+        }
+
+        .center-text {
+            text-align: center;
+            color: #6e7681;
+            font-style: italic;
+            padding: 20px;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-row {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .top-nav {
+                padding: 15px 20px;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .dashboard {
+                padding: 20px 15px;
+            }
+
+            .stats-row {
+                grid-template-columns: 1fr;
+            }
+
+            .user-name {
+                display: none;
+            }
+
+            .nav-links {
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .heatmap-container {
+                overflow-x: auto;
+            }
+
+            .auto-tracker {
+                bottom: 15px;
+                right: 15px;
+                padding: 10px 15px;
+            }
+        }
+    </style>
 </head>
 <body>
+
+<!-- Auto-Tracker Indicator -->
+<div class="auto-tracker" id="autoTracker">
+    <div class="tracker-dot"></div>
+    <div>
+        <div class="tracker-text">Auto-Tracking Active</div>
+        <div class="tracker-time" id="sessionTime">Session: 0 min</div>
+    </div>
+</div>
+
+<!-- Tooltip for heatmap -->
+<div id="heatmapTooltip" class="heatmap-tooltip"></div>
+
+<!-- Top Navigation -->
+<div class="top-nav">
+    <div class="logo">
+        <div class="logo-icon">🎓</div>
+        <span>Smart Academic Calendar</span>
+    </div>
+    <div class="user-menu">
+        <span class="user-name">👤 {{ username }}</span>
+        <div class="nav-links">
+            <a href="/profile" class="nav-btn btn-profile">Edit Profile</a>
+            <a href="/logout" class="nav-btn btn-logout">Logout</a>
+        </div>
+    </div>
+</div>
 
 <div class="dashboard">
 
@@ -16,81 +894,164 @@
         <!-- Stats Row -->
         <div class="stats-row">
             <div class="card stat-box">
-                <h3>Daily Time</h3>
-                <p>
-                    {{ daily_time }}
-                    {{ 'hour' if daily_time == 1 else 'hours' }}
-                </p>
+                <h3>Daily Goal</h3>
+                <p>{{ daily_time }}m</p>
             </div>
 
-            <div class="card stat-box">
-                <h3>Missing Skills</h3>
+            <div class="card stat-box secondary">
+                <h3>Skill Gaps</h3>
                 <p>{{ missing_skills|length }}</p>
+            </div>
+
+            <div class="card stat-box tertiary">
+                <h3>Progress</h3>
+                <p>{{ completion_percentage }}%</p>
+            </div>
+
+            <div class="card stat-box quaternary">
+                <h3>Sector</h3>
+                <p class="small-text">{{ sector }}</p>
             </div>
         </div>
 
         <!-- Career Goal -->
         <div class="card">
-            <h3>Career Goal</h3>
+            <h3>🎯 Career Goal</h3>
             <p class="goal-text">{{ goal }}</p>
+            <span class="sector-badge">{{ sector }} Sector</span>
+            
+            <div class="progress-container progress-spacing">
+                <div class="progress-bar">
+                    <div class="progress-fill" data-width="{{ completion_percentage }}"></div>
+                </div>
+                <p class="progress-text">{{ completion_percentage }}% complete on your roadmap</p>
+            </div>
         </div>
 
-        <!-- Learning Heatmap -->
+        <!-- BEAUTIFUL HEATMAP - LeetCode Style -->
         <div class="card">
-            <h3>Learning Heatmap</h3>
-
-            <div class="month-labels">
-                {% for month in month_labels %}
-                    <span class="month">{{ month.name }}</span>
-                {% endfor %}
+            <div class="heatmap-header">
+                <h3>📅 Learning Activity</h3>
+                <div class="heatmap-stats">
+                    <span>🔥 <span class="highlight">{{ current_streak }}</span> day streak</span>
+                    <span>📊 <span class="highlight" id="todayMinutesDisplay">{{ today_minutes }}</span> min today</span>
+                </div>
             </div>
 
-            <div class="year-heatmap">
-                {% for level in heatmap %}
-                    <div class="heat l{{ level }}"></div>
-                {% endfor %}
-            </div>
+            <div class="heatmap-container">
+                <!-- Month labels on top -->
+                <div class="heatmap-months" id="monthLabelsTop"></div>
+                
+                <!-- Main heatmap with day labels -->
+                <div class="heatmap-wrapper">
+                    <!-- Day labels (Sun, Mon, Tue, etc.) -->
+                    <div class="day-labels">
+                        <div class="day-label">Sun</div>
+                        <div class="day-label">Mon</div>
+                        <div class="day-label">Tue</div>
+                        <div class="day-label">Wed</div>
+                        <div class="day-label">Thu</div>
+                        <div class="day-label">Fri</div>
+                        <div class="day-label">Sat</div>
+                    </div>
+                    
+                    <!-- Heatmap grid -->
+                    <div class="heatmap-grid" id="heatmapGrid">
+                        {% for week in heatmap_weeks %}
+                            <div class="heatmap-week">
+                                {% for day in week %}
+                                    <div class="heatmap-day" 
+                                         data-level="{{ day.level }}"
+                                         data-date="{{ day.date }}"
+                                         data-minutes="{{ day.minutes }}"
+                                         data-goal="{{ daily_time }}"
+                                         data-goal-met="{{ day.goal_met }}">
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
 
-            <div class="heatmap-legend">
-                <span>Less</span>
-                <span class="l0"></span>
-                <span class="l1"></span>
-                <span class="l2"></span>
-                <span class="l3"></span>
-                <span class="l4"></span>
-                <span>More</span>
+                <!-- Legend -->
+                <div class="heatmap-legend">
+                    <span class="legend-label">Less</span>
+                    <span class="legend-square" style="background: #161b22;"></span>
+                    <span class="legend-square" style="background: #0e4429;"></span>
+                    <span class="legend-square" style="background: #006d32;"></span>
+                    <span class="legend-square" style="background: #26a641;"></span>
+                    <span class="legend-square" style="background: #39d353;"></span>
+                    <span class="legend-label">More</span>
+                </div>
             </div>
         </div>
 
         <!-- Roadmap Progress -->
         <div class="card">
-            <h3>Roadmap to {{ goal }}</h3>
+            <h3>🗺️ Your Learning Roadmap</h3>
 
             <div class="roadmap">
                 {% for step in roadmap_graph %}
                     <div class="roadmap-step {% if step.completed %}completed{% else %}pending{% endif %}">
                         <span class="dot"></span>
                         <span class="skill-name">{{ step.skill }}</span>
+                        {% if step.completed %}
+                            <span class="checkmark">✓</span>
+                        {% endif %}
                     </div>
                 {% endfor %}
             </div>
         </div>
 
-        <!-- Learning Recommendations -->
+        <!-- AI-Powered Recommendations -->
         <div class="card">
-            <h3>Recommended Learning Resources</h3>
+            <h3>🤖 AI-Powered Learning Resources</h3>
 
-            <div class="course-grid">
+            {% if recommendations %}
                 {% for rec in recommendations %}
-                    <div class="course-card">
-                        <span class="tag">{{ rec.platform }}</span>
-                        <h4>{{ rec.skill }}</h4>
-                        <a href="{{ rec.link }}" target="_blank">Open Resource</a>
+                    <div class="recommendation-section">
+                        <div class="section-header">
+                            <span class="skill-badge">{{ rec.skill }}</span>
+                        </div>
+
+                        <!-- Courses -->
+                        {% if rec.courses %}
+                            <h4 class="section-title">📚 Recommended Courses</h4>
+                            <div class="course-grid">
+                                {% for course in rec.courses %}
+                                    <div class="course-card">
+                                        <span class="platform-tag">{{ course.platform }}</span>
+                                        {% if course.thumbnail %}
+                                            <img src="{{ course.thumbnail }}" class="course-thumbnail" alt="{{ course.title }}">
+                                        {% endif %}
+                                        <h4>{{ course.title }}</h4>
+                                        <a href="{{ course.link }}" target="_blank" onclick="trackCourse('{{ rec.skill }}'); return true;">Start Learning →</a>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+
+                        <!-- Projects -->
+                        {% if rec.projects %}
+                            <h4 class="section-title" style="margin-top: 20px;">💡 Practice Projects</h4>
+                            <div class="project-grid">
+                                {% for project in rec.projects %}
+                                    <div class="project-card">
+                                        <div class="project-name">{{ project.name }}</div>
+                                        <div class="project-description">{{ project.description[:100] }}...</div>
+                                        <div class="project-meta">
+                                            <span class="project-stars">⭐ {{ project.stars }}</span>
+                                            <a href="{{ project.url }}" target="_blank" class="project-link">View Project →</a>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
                     </div>
-                {% else %}
-                    <p class="center-text">No recommendations 🎉</p>
                 {% endfor %}
-            </div>
+            {% else %}
+                <p class="center-text">🎉 Congratulations! You've mastered all required skills!</p>
+            {% endif %}
         </div>
 
     </div>
@@ -98,22 +1059,25 @@
     <!-- RIGHT COLUMN -->
     <div class="right-column">
 
-        <!-- Weekly Visit Streak -->
+        <!-- Weekly Streak & Today's Progress -->
         <div class="card">
-            <h3>Visit Streak</h3>
-
-            <div class="calendar">
-                {% for day in week %}
-                    <div class="day {% if day.active %}active{% endif %}">
-                        {{ day.name }}
-                    </div>
-                {% endfor %}
+            <div class="streak-header">
+                <h3>🔥 Current Streak</h3>
+                <span class="streak-count">{{ current_streak }} days</span>
+            </div>
+            
+            <div class="today-progress">
+                <h4>Today's Progress</h4>
+                <div class="today-bar">
+                    <div class="today-bar-fill" data-width="{{ today_percentage }}" id="todayProgressBar"></div>
+                </div>
+                <p class="today-text" id="todayProgressText">{{ today_minutes }} / {{ daily_time }} minutes ({{ today_percentage }}%)</p>
             </div>
         </div>
 
         <!-- Skill Gaps -->
         <div class="card">
-            <h3>Skill Gaps</h3>
+            <h3>🎯 Skills to Learn</h3>
 
             {% if missing_skills %}
                 <div class="skill-list">
@@ -122,13 +1086,248 @@
                     {% endfor %}
                 </div>
             {% else %}
-                <p class="center-text">All required skills achieved 🎉</p>
+                <p class="center-text">🎉 All skills achieved!</p>
+            {% endif %}
+        </div>
+
+        <!-- Recent Achievements -->
+        <div class="card">
+            <h3>🏆 Recent Achievements</h3>
+            
+            {% if achievements %}
+                <div class="achievements-list">
+                    {% for achievement in achievements %}
+                        <div class="achievement-item">
+                            <div class="achievement-title">{{ achievement.title }}</div>
+                            <div class="achievement-desc">{{ achievement.description }}</div>
+                            <div class="achievement-date">{{ achievement.date }}</div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="center-text">Start learning to unlock achievements!</p>
             {% endif %}
         </div>
 
     </div>
 
 </div>
+
+<script>
+    // =========================================
+    // AUTOMATIC TIME TRACKER
+    // =========================================
+    let sessionStartTime = Date.now();
+    let sessionMinutes = 0;
+    let isActive = true;
+    let lastSaveTime = Date.now();
+    const SAVE_INTERVAL = 5 * 60 * 1000;
+    const dailyGoal = {{ daily_time }};
+    let currentTodayMinutes = {{ today_minutes }};
+
+    function updateSessionTime() {
+        if (!isActive) return;
+        
+        const elapsed = Math.floor((Date.now() - sessionStartTime) / 1000 / 60);
+        sessionMinutes = elapsed;
+        document.getElementById('sessionTime').textContent = `Session: ${elapsed} min`;
+        
+        if (Date.now() - lastSaveTime >= SAVE_INTERVAL) {
+            saveActivity();
+            lastSaveTime = Date.now();
+        }
+    }
+
+    function saveActivity() {
+        if (sessionMinutes === 0) return;
+        
+        fetch('/log_activity', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ minutes: sessionMinutes, skill: 'study' })
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log('✅ Auto-saved:', sessionMinutes, 'minutes');
+            currentTodayMinutes += sessionMinutes;
+            updateProgressUI();
+            sessionStartTime = Date.now();
+            sessionMinutes = 0;
+            
+            if (data.new_achievement) {
+                alert('🎉 New achievement unlocked!');
+                setTimeout(() => window.location.reload(), 1000);
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    }
+
+    function updateProgressUI() {
+        const percentage = Math.min(Math.floor((currentTodayMinutes / dailyGoal) * 100), 100);
+        const todayDisplay = document.getElementById('todayMinutesDisplay');
+        if (todayDisplay) todayDisplay.textContent = currentTodayMinutes;
+        
+        const progressBar = document.getElementById('todayProgressBar');
+        if (progressBar) progressBar.style.width = percentage + '%';
+        
+        const progressText = document.getElementById('todayProgressText');
+        if (progressText) {
+            progressText.textContent = `${currentTodayMinutes} / ${dailyGoal} minutes (${percentage}%)`;
+        }
+    }
+
+    let lastActivity = Date.now();
+    let inactivityTimeout;
+
+    function resetInactivityTimer() {
+        lastActivity = Date.now();
+        if (!isActive) {
+            isActive = true;
+            sessionStartTime = Date.now();
+        }
+        
+        clearTimeout(inactivityTimeout);
+        inactivityTimeout = setTimeout(() => {
+            if (Date.now() - lastActivity > 5 * 60 * 1000) {
+                isActive = false;
+            }
+        }, 5 * 60 * 1000);
+    }
+
+    document.addEventListener('mousemove', resetInactivityTimer);
+    document.addEventListener('keydown', resetInactivityTimer);
+    document.addEventListener('scroll', resetInactivityTimer);
+    document.addEventListener('click', resetInactivityTimer);
+
+    setInterval(updateSessionTime, 60000);
+    
+    window.addEventListener('beforeunload', (e) => {
+        if (sessionMinutes > 0) saveActivity();
+    });
+
+    resetInactivityTimer();
+
+    // =========================================
+    // BEAUTIFUL HEATMAP - GENERATE MONTH LABELS
+    // =========================================
+    document.addEventListener('DOMContentLoaded', function() {
+        const progressFill = document.querySelector('.progress-fill');
+        if (progressFill) {
+            const width = progressFill.getAttribute('data-width');
+            setTimeout(() => { progressFill.style.width = width + '%'; }, 300);
+        }
+
+        const todayFill = document.querySelector('.today-bar-fill');
+        if (todayFill) {
+            const width = todayFill.getAttribute('data-width');
+            setTimeout(() => { todayFill.style.width = width + '%'; }, 300);
+        }
+
+        generateMonthLabels();
+    });
+
+    function generateMonthLabels() {
+        const weeks = document.querySelectorAll('.heatmap-week');
+        const monthLabelsContainer = document.getElementById('monthLabelsTop');
+        
+        if (!weeks.length || !monthLabelsContainer) return;
+
+        const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
+                           'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        
+        let currentMonth = null;
+        
+        weeks.forEach((week, weekIndex) => {
+            const firstDay = week.querySelector('.heatmap-day[data-date]');
+            if (!firstDay) return;
+            
+            const dateStr = firstDay.getAttribute('data-date');
+            if (!dateStr) return;
+            
+            const date = new Date(dateStr + 'T00:00:00');
+            const month = date.getMonth();
+            
+            if (currentMonth !== month) {
+                const label = document.createElement('div');
+                label.className = 'month-label';
+                label.textContent = monthNames[month];
+                monthLabelsContainer.appendChild(label);
+                currentMonth = month;
+            } else {
+                const spacer = document.createElement('div');
+                spacer.className = 'month-label';
+                spacer.style.visibility = 'hidden';
+                monthLabelsContainer.appendChild(spacer);
+            }
+        });
+    }
+
+    // Heatmap tooltip
+    const tooltip = document.getElementById('heatmapTooltip');
+    const heatmapDays = document.querySelectorAll('.heatmap-day');
+
+    heatmapDays.forEach(day => {
+        day.addEventListener('mouseenter', function(e) {
+            const level = this.getAttribute('data-level');
+            const date = this.getAttribute('data-date');
+            const minutes = this.getAttribute('data-minutes');
+            const goal = this.getAttribute('data-goal');
+            const goalMet = this.getAttribute('data-goal-met') === '1';
+            
+            if (level === '-1' || !date) return;
+            
+            const dateObj = new Date(date + 'T00:00:00');
+            const options = { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' };
+            const formattedDate = dateObj.toLocaleDateString('en-US', options);
+            
+            let tooltipHTML = `<div class="tooltip-date">${formattedDate}</div>`;
+            
+            if (minutes > 0) {
+                tooltipHTML += `<div class="tooltip-minutes">${minutes} minutes of learning</div>`;
+                
+                if (goalMet) {
+                    tooltipHTML += `<div class="tooltip-goal met">✓ Daily goal achieved!</div>`;
+                } else {
+                    tooltipHTML += `<div class="tooltip-goal not-met">Goal: ${goal} minutes</div>`;
+                }
+            } else {
+                tooltipHTML += `<div class="tooltip-minutes">No activity</div>`;
+            }
+            
+            tooltip.innerHTML = tooltipHTML;
+            tooltip.classList.add('show');
+            
+            const rect = this.getBoundingClientRect();
+            tooltip.style.left = rect.left + (rect.width / 2) - (tooltip.offsetWidth / 2) + 'px';
+            tooltip.style.top = rect.top - tooltip.offsetHeight - 10 + 'px';
+        });
+        
+        day.addEventListener('mouseleave', function() {
+            tooltip.classList.remove('show');
+        });
+    });
+    // Track course clicks and show skill unlock
+    function trackCourse(skill) {
+        fetch('/track_course_click', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ skill: skill })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.skill_unlocked) {
+                alert(`🎉 Skill Unlocked: ${data.skill_name.toUpperCase()}!\n\nYou've completed 2+ hours of learning!\nThis skill has been added to your profile.\n\nCareer Progress Updated! ✨`);
+                setTimeout(() => window.location.reload(), 1500);
+            } else if (data.new_achievement) {
+                alert('🎉 New achievement unlocked!');
+                setTimeout(() => window.location.reload(), 1000);
+            }
+        })
+        .catch(error => console.error('Error:', error));
+        
+        return true;
+    }
+</script>
 
 </body>
 </html>
